@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'auth_app',
     'family_app',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
@@ -56,14 +58,14 @@ MIDDLEWARE = [
 
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://127.0.0.1:5500',    
+    'http://127.0.0.1:5500',
     'http://localhost:5500'
-    ]
+]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:5500',    
+    'http://127.0.0.1:5500',
     'http://localhost:5500'
-    ]
+]
 
 ROOT_URLCONF = 'Core.urls'
 
@@ -131,3 +133,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+
+REST_FRAMEWORK = {
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'auth_app.authentication.CookieJWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+
+}

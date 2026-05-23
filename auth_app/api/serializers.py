@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.serializers import  TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 User = get_user_model()
+
 
 class Registrationserializer(serializers.ModelSerializer):
     """
@@ -11,7 +12,7 @@ class Registrationserializer(serializers.ModelSerializer):
     - Username
     - Email
     - Password confirmation
-    """ 
+    """
 
     confirmed_password = serializers.CharField(write_only=True)
 
@@ -68,3 +69,29 @@ class Registrationserializer(serializers.ModelSerializer):
         account.set_password(pw)
         account.save()
         return account
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Extended JWT serializer that embeds additional user information
+    into the token response.
+    """
+
+    username_field = User.USERNAME_FIELD
+
+    def validate(self, attrs):
+        """
+        Validates the login credentials and extends the JWT response.
+
+        Args:
+            attrs (dict): The incoming authentication data (e.g. username & password).
+
+        Returns:
+            dict: The token response, extended with the user's 'email' and 'id'.
+        """
+        data = super().validate(attrs)
+        data['email'] = self.user.email
+        data['id'] = self.user.id
+        data['role'] = self.user.role
+
+        return data

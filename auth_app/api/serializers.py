@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-User = get_user_model()
+from auth_app.models import User
 
 
 class Registrationserializer(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class Registrationserializer(serializers.ModelSerializer):
     - Email
     - Password confirmation
     """
-
+    email = serializers.EmailField(required=False, allow_blank=True)
     confirmed_password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -21,12 +21,22 @@ class Registrationserializer(serializers.ModelSerializer):
         Meta configuration for Registrationserializer.
         """
         model = User
-        fields = ['username', 'email', 'password', 'confirmed_password']
+        fields = ['username', 'email', 'password', 'confirmed_password', 'role']
         extra_kwargs = {
             'password': {'write_only': True},
             'email': {'required': True}
         }
 
+    def validate(self, attrs):
+        role = attrs.get('role')
+        email = attrs.get('email')
+        
+        if role != 'parent':
+            if not email:
+                raise serializers.ValidationError("email:" "email is for this role necessary ")
+        return attrs
+    
+    
     def validate_confirmed_password(self, value):
         """
         Ensure that the confirmed password matches the original password.
@@ -51,24 +61,31 @@ class Registrationserializer(serializers.ModelSerializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError('Email already exists')
         return value
-
-    def save(self):
-        """
-        Create and save a new user instance.
-
-        The password is securely hashed using Django's set_password method.
-
-        :return: The created User instance
-        """
-        pw = self.validated_data['password']
+    
+    def validate_role(self, value):
+        if not value:
+             raise serializers.ValidationError("User type is required.")
+        if value not in dict(User.UserType.choices).keys():
+                raise serializers.ValidationError("Invalid user type.")
+        return value
+    
+    
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
         username = self.validated_data['username']
-        account = User(
-            email=self.validated_data['email'],
-            username=username
-        )
-        account.set_password(pw)
-        account.save()
-        return account
+        email = self.validated_data['email']
+        role = self.validated_data['username']
+        
+        user = User(
+            username=username,
+            email=email,
+            role=role
+            )
+        user.set_password(password)
+        user.save()
+        return user
+
+
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

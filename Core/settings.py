@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'auth_app',
-    'family_app',
+    'family_organizer',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
 ]
@@ -68,7 +68,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 ROOT_URLCONF = 'Core.urls'
-
+AUTH_USER_MODEL = "auth_app.User"
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -134,11 +134,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'auth_app.authentication.CookieJWTAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 

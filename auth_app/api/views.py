@@ -1,7 +1,10 @@
 from rest_framework.response import Response
 from rest_framework import generics, status
-from auth_app.api.serializers import Registrationserializer
-
+from auth_app.api.serializers import Registrationserializer, LoginParentSerializer
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 class RegistrationView(generics.CreateAPIView):
     """
@@ -22,3 +25,31 @@ class RegistrationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    
+class LoginParentView(TokenObtainPairView):
+    """
+    API view for obtaining JWT tokens for parent users.
+
+    Inherits from TokenObtainPairView to provide token generation functionality.
+    """
+    serializer_class = LoginParentSerializer
+    
+    
+    def post(self, request, *args, **kwargs):
+        seralizer = self.get_serializer(data=request.data)
+        if not seralizer.is_valid():
+            return Response(seralizer.errors, status=status.HTTP_401_UNAUTHORIZED)
+        
+        refresh = seralizer.validated_data['refresh']
+        access = seralizer.validated_data['access']
+        response = Response({"detail": "Login successfully!","user": {'id': seralizer.user.id,'username': seralizer.user.username,
+                                                                      'email': seralizer.user.email, 'role': seralizer.user.role }}
+                                                                        ,status=status.HTTP_200_OK)
+
+        response.set_cookie(
+            key="access_token", value=access, httponly=True, secure=True, samesite="Lax")
+        
+        response.set_cookie(
+            key="refresh_token", value=refresh, httponly=True, secure=True, samesite="Lax")
+        return response

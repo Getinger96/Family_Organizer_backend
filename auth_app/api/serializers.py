@@ -63,9 +63,11 @@ class Registrationserializer(serializers.ModelSerializer):
         return value
     
     def validate_role(self, value):
+        valid_roles = dict(User.Roles.choices).keys()
+        print(valid_roles)
         if not value:
              raise serializers.ValidationError("User type is required.")
-        if value not in dict(User.UserType.choices).keys():
+        if value not in valid_roles:
                 raise serializers.ValidationError("Invalid user type.")
         return value
     
@@ -86,7 +88,36 @@ class Registrationserializer(serializers.ModelSerializer):
         return user
 
 
+class LoginParentSerializer(TokenObtainPairSerializer):
+    username_field = "email"
+    id = serializers.IntegerField(read_only=True)
+        
+    class Meta:
+        model = User
+        fields = ['email', 'password', 'role']
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'email': {'required': True}
+        }
+        
+    
+        
+    def validate(self, attrs):
+        email = attrs.get('email')
+        role= attrs.get('role')
+        password= attrs.get('password')
+        
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist.")
+            
+        if not user.check_password(password.strip()):
+            raise serializers.ValidationError("wrong password")
 
+        data = super().validate({"username": user.username, "password": password, "role": role})
+        return data
+    
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """

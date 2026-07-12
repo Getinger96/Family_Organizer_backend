@@ -1,8 +1,10 @@
+import email
+
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from auth_app.models import User
-
+from django.contrib.auth import authenticate
 
 class Registrationserializer(serializers.ModelSerializer):
     """
@@ -76,7 +78,7 @@ class Registrationserializer(serializers.ModelSerializer):
         password = validated_data.pop('password', None)
         username = self.validated_data['username']
         email = self.validated_data['email']
-        role = self.validated_data['username']
+        role = self.validated_data['role']
         
         user = User(
             username=username,
@@ -88,25 +90,33 @@ class Registrationserializer(serializers.ModelSerializer):
         return user
 
 
+
+User = get_user_model()
 class LoginParentSerializer(TokenObtainPairSerializer):
-    username_field = "email"
     id = serializers.IntegerField(read_only=True)
-        
+    email = serializers.EmailField()                     
+   
     class Meta:
         model = User
         fields = ['email', 'password', 'role']
         extra_kwargs = {
-            'password': {'write_only': True},
-            'email': {'required': True}
+            'password': {'write_only': True},  'email': {'required': True}
         }
         
-    
-        
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields.pop('username')
+            
     def validate(self, attrs):
+        print(attrs)
         email = attrs.get('email')
-        role= attrs.get('role')
         password= attrs.get('password')
+        role = self.initial_data.get('role')   
+        user = User.objects.filter(email=email).first()
         
+        
+        if role !="parent":
+             raise serializers.ValidationError("User type is not parent.")
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
@@ -116,6 +126,8 @@ class LoginParentSerializer(TokenObtainPairSerializer):
             raise serializers.ValidationError("wrong password")
 
         data = super().validate({"username": user.username, "password": password, "role": role})
+    
+        
         return data
     
 

@@ -43,7 +43,7 @@ class LoginParentView(TokenObtainPairView):
         
         refresh = seralizer.validated_data['refresh']
         access = seralizer.validated_data['access']
-        response = Response({"detail": "Login successfully!","user": {'id': seralizer.user.id,'username': seralizer.user.username,
+        response = Response({"detail": "Login successfully!","user": {'id': seralizer.user.id,
                                                                       'email': seralizer.user.email, 'role': seralizer.user.role }}
                                                                         ,status=status.HTTP_200_OK)
 

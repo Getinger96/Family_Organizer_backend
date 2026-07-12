@@ -98,9 +98,9 @@ class LoginParentSerializer(TokenObtainPairSerializer):
    
     class Meta:
         model = User
-        fields = ['email', 'password', 'role']
+        fields = ['email', 'password']
         extra_kwargs = {
-            'password': {'write_only': True},  'email': {'required': True}
+             'password': {'write_only': True},  'email': {'required': True}
         }
         
     def __init__(self, *args, **kwargs) -> None:
@@ -111,21 +111,23 @@ class LoginParentSerializer(TokenObtainPairSerializer):
         print(attrs)
         email = attrs.get('email')
         password= attrs.get('password')
-        role = self.initial_data.get('role')   
         user = User.objects.filter(email=email).first()
         
-        
-        if role !="parent":
-             raise serializers.ValidationError("User type is not parent.")
+    
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             raise serializers.ValidationError("User with this email does not exist.")
-            
+        
+        
+        if user.role != 'parent':
+            raise serializers.ValidationError("User type is not parent.")
+        
+        
         if not user.check_password(password.strip()):
             raise serializers.ValidationError("wrong password")
 
-        data = super().validate({"username": user.username, "password": password, "role": role})
+        data = super().validate({"username": user.username, "password": password, "role": user.role})
     
         
         return data

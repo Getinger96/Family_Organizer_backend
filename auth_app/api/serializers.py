@@ -3,8 +3,17 @@ import email
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from auth_app.models import User
+from auth_app.models import User, Child
 from django.contrib.auth import authenticate
+
+
+
+
+
+class ChildSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Child
+        fields = ['id', 'name', 'age', 'image']
 
 class Registrationserializer(serializers.ModelSerializer):
     """
@@ -17,13 +26,14 @@ class Registrationserializer(serializers.ModelSerializer):
     """
     email = serializers.EmailField(required=False, allow_blank=True)
     confirmed_password = serializers.CharField(write_only=True)
+    children = ChildSerializer(many=True, required=False)
 
     class Meta:
         """
         Meta configuration for Registrationserializer.
         """
         model = User
-        fields = ['username', 'email', 'password', 'confirmed_password', 'role']
+        fields = ['username', 'email', 'password', 'confirmed_password', 'role', 'children']
         extra_kwargs = {
             'password': {'write_only': True},
             'email': {'required': True}
@@ -79,7 +89,11 @@ class Registrationserializer(serializers.ModelSerializer):
         username = self.validated_data['username']
         email = self.validated_data['email']
         role = self.validated_data['role']
+        children_data = validated_data.pop('children', [])
         
+        if len(children_data) < 0:
+                raise serializers.ValidationError("Only parents can have children.")
+
         user = User(
             username=username,
             email=email,
@@ -87,6 +101,8 @@ class Registrationserializer(serializers.ModelSerializer):
             )
         user.set_password(password)
         user.save()
+        for child_data in children_data:
+            Child.objects.create(parent=user,**child_data)
         return user
 
 

@@ -1,10 +1,12 @@
-from rest_framework.response import Response
-from rest_framework import generics, status
+
 from auth_app.api.serializers import Registrationserializer, LoginParentSerializer
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
-    TokenRefreshView,
 )
+from django.utils.http import  urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from rest_framework.response import Response
+from rest_framework import generics, status
 
 class RegistrationView(generics.CreateAPIView):
     """
@@ -24,6 +26,14 @@ class RegistrationView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        user.is_active = False
+        host = request.get_host()
+        print(serializer.data)
+        print(host)
+        code = urlsafe_base64_encode(force_bytes(user.pk))
+        print(code)
+        
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     

@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from auth_app.models import User, Child
 from django.contrib.auth import authenticate
-
+from .token import  generate_random_token
 
 
 
@@ -13,7 +13,12 @@ from django.contrib.auth import authenticate
 class ChildSerializer(serializers.ModelSerializer):
     class Meta:
         model = Child
-        fields = ['id', 'name', 'age', 'image']
+        fields = ['id', 'name', 'age', 'image', 'password']
+        extra_kwargs = {
+
+             'password': {'required': False}
+        }
+
 
 class Registrationserializer(serializers.ModelSerializer):
     """
@@ -102,6 +107,8 @@ class Registrationserializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         for child_data in children_data:
+            token = generate_random_token()
+            child_data['password'] = token
             Child.objects.create(parent=user,**child_data)
         return user
 
@@ -116,6 +123,7 @@ class LoginParentSerializer(TokenObtainPairSerializer):
         model = User
         fields = ['email', 'password']
         extra_kwargs = {
+
              'password': {'write_only': True},  'email': {'required': True}
         }
         

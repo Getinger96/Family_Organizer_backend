@@ -21,6 +21,6 @@ class Child(models.Model):
     age = models.PositiveIntegerField()
     name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='child_images/', blank=True, null=True)
-
+    password  = models.CharField(max_length=8, default="")
     def __str__(self):
         return f"{self.name} - Child of {self.parent.username}"

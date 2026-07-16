@@ -18,6 +18,10 @@ class ChildSerializer(serializers.ModelSerializer):
 
              'password': {'required': False}
         }
+        
+        
+    
+            
 
 
 class Registrationserializer(serializers.ModelSerializer):

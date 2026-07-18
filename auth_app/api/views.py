@@ -32,6 +32,11 @@ class RegistrationView(generics.CreateAPIView):
         zahl = generate_random_token()
         print(zahl)
         print(serializer.data['children'])
+        children_data = serializer.data['children']
+        
+        for children in children_data
+        
+        
         print(host)
         code = urlsafe_base64_encode(force_bytes(user.pk))
         print(code)

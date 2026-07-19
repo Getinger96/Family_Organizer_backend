@@ -8,6 +8,7 @@ from django.utils.encoding import force_bytes, force_str
 from rest_framework.response import Response
 from rest_framework import generics, status
 from .token import generate_random_token
+from .helper import get_child_data
 class RegistrationView(generics.CreateAPIView):
     """
     API view for user registration.
@@ -29,12 +30,11 @@ class RegistrationView(generics.CreateAPIView):
         user.is_active = False
         host = request.get_host()
         print(serializer.data)
-        zahl = generate_random_token()
-        print(zahl)
         print(serializer.data['children'])
         children_data = serializer.data['children']
-        
-        for children in children_data
+        childs = get_child_data(children_data)
+        print(childs)
+       
         
         
         print(host)

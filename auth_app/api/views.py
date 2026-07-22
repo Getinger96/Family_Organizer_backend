@@ -7,8 +7,12 @@ from django.utils.http import  urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from rest_framework.response import Response
 from rest_framework import generics, status
-from .token import generate_random_token
-from .helper import get_child_data
+from .token import generate_random_token, account_activation_token
+from .helper import get_child_data, sendingEmail
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
+
 class RegistrationView(generics.CreateAPIView):
     """
     API view for user registration.
@@ -33,12 +37,19 @@ class RegistrationView(generics.CreateAPIView):
         print(serializer.data['children'])
         children_data = serializer.data['children']
         childs = get_child_data(children_data)
+        token = account_activation_token(user)
         print(childs)
-       
-        
+        code = urlsafe_base64_encode(force_bytes(user.pk))
+        user_display = user.username if user.username else user.email
+        user_email = user.email
+        text_content = render_to_string(
+        "templates/register_account.html",
+        context={'user': user_display, 'domain': host, 'childs': childs, 'token': token, 'id': code, 'Frontend_URL': settings.FRONTEND_URL    },
+        )
+        sendingEmail(text_content, user_email )
         
         print(host)
-        code = urlsafe_base64_encode(force_bytes(user.pk))
+       
         print(code)
         
 

@@ -7,7 +7,7 @@ from django.utils.http import  urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from rest_framework.response import Response
 from rest_framework import generics, status
-from .token import generate_random_token, account_activation_token
+from .token import  account_activation_token
 from .helper import get_child_data, sendingEmail
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -37,7 +37,7 @@ class RegistrationView(generics.CreateAPIView):
         print(serializer.data['children'])
         children_data = serializer.data['children']
         childs = get_child_data(children_data)
-        token = account_activation_token(user)
+        token = account_activation_token.make_token(user)
         print(childs)
         code = urlsafe_base64_encode(force_bytes(user.pk))
         user_display = user.username if user.username else user.email
@@ -46,14 +46,13 @@ class RegistrationView(generics.CreateAPIView):
         "templates/register_account.html",
         context={'user': user_display, 'domain': host, 'childs': childs, 'token': token, 'id': code, 'Frontend_URL': settings.FRONTEND_URL    },
         )
-        sendingEmail(text_content, user_email )
         
-        print(host)
-       
-        print(code)
+        if sendingEmail(text_content, user_email ):
+            response = Response({"user":{'id': user.id, 'email':user_email  },'token': token}, status=status.HTTP_200_OK)
+            return response
+        else: 
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     
 class LoginParentView(TokenObtainPairView):

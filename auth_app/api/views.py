@@ -32,6 +32,7 @@ class RegistrationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         user.is_active = False
+        user.save()
         host = request.get_host()
         print(serializer.data)
         print(serializer.data['children'])
@@ -43,8 +44,8 @@ class RegistrationView(generics.CreateAPIView):
         user_display = user.username if user.username else user.email
         user_email = user.email
         text_content = render_to_string(
-        "templates/register_account.html",
-        context={'user': user_display, 'domain': host, 'childs': childs, 'token': token, 'id': code, 'Frontend_URL': settings.FRONTEND_URL    },
+        "register_account.html",
+        context={'user': user_display, 'domain': host, 'childs': childs, 'token': token, 'id': code, 'FRONTEND_URL': settings.FRONTEND_URL    },
         )
         
         if sendingEmail(text_content, user_email ):

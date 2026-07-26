@@ -22,5 +22,6 @@ def generate_random_token():
 
     while True:
         token =  ''.join(random.choice(chars) for i in range(length))
-        if not Child.objects.filter(password=token).exists():
-            return token
+        if Child.objects.filter(password=token).exists():
+            continue
+        return token

@@ -18,7 +18,7 @@ def get_child_data(children_data):
         "age": child["age"]
         })
         
-    print(new_child_list)
+    return new_child_list
 
     
     
@@ -30,10 +30,14 @@ def sendingEmail(contex, email_to):
         to=[email_to],
     )
     
-    message.attach_alternative(contex, "/templates/register_account.html")
+    message.attach_alternative(contex, "text/html")
     message.attach(logo_data())
-    message.send(fail_silently=False)
-    return message
+    try:
+        message.send()
+        return True
+    except Exception as e:
+        print("EMAIL FEHLER:", e)
+        return False
     
     
 @lru_cache()

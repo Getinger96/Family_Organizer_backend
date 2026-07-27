@@ -39,6 +39,7 @@ class RegistrationView(generics.CreateAPIView):
         children_data = serializer.data['children']
         childs = get_child_data(children_data)
         token = account_activation_token.make_token(user)
+        (user)
         print(childs)
         code = urlsafe_base64_encode(force_bytes(user.pk))
         user_display = user.username if user.username else user.email

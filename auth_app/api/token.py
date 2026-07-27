@@ -18,10 +18,13 @@ def generate_token_for_childs(user, child_data):
 def generate_random_token():
     length = 6
     chars = string.ascii_letters + string.digits + '!@#$%^&*()'
-    
+    token = ""
 
     while True:
-        token =  ''.join(random.choice(chars) for i in range(length))
+        for i in range(length):
+            sign = random.choice(chars)
+            token += ''.join(sign)
+
         if Child.objects.filter(password=token).exists():
             continue
         return token

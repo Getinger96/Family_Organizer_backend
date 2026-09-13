@@ -1,6 +1,7 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 import random, string
 from auth_app.models import Child 
+
 class generate_token(PasswordResetTokenGenerator):
     
  def _make_hash_value(self, user, timestamp):

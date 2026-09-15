@@ -23,6 +23,7 @@ class Child(models.Model):
      parent = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='children'
     )
+     password  = models.CharField(max_length=8, default="")
      age = models.PositiveIntegerField()
      name = models.CharField(max_length=100)
      image = models.ImageField(upload_to='child_images/', blank=True, null=True)

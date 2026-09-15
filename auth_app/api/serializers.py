@@ -11,6 +11,7 @@ from .token import  generate_random_token
 
 
 class ChildSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Child
         fields = ['id', 'name', 'age', 'image', 'password']

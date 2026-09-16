@@ -38,6 +38,7 @@ class RegistrationView(generics.CreateAPIView):
         print(serializer.data['children'])
         children_data = serializer.data['children']
         childs = get_child_data(children_data)
+
         token = account_activation_token.make_token(user)
         (user)
         print(childs)
@@ -50,7 +51,7 @@ class RegistrationView(generics.CreateAPIView):
         )
         
         if sendingEmail(text_content, user_email ):
-            response = Response({"user":{'id': user.id, 'email':user_email  },'token': token}, status=status.HTTP_200_OK)
+            response = Response({"user":{'id': user.id, 'email':user_email  },'token': token, 'children': childs},  status=status.HTTP_200_OK)
             return response
         else: 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -17,9 +17,6 @@ class User(AbstractUser):
 
 
 class Child(models.Model):
-     user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name='child_profile'
-    )
      parent = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='children'
     )
